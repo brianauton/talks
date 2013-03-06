@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JavaScript Testing for Rails Apps</title>
+    <link href='css/reveal.min.css' rel='stylesheet'>
+    <link href='css/theme/default.css' id='theme' rel='stylesheet'>
+    <link href='lib/css/tomorrow-night-bright.css' rel='stylesheet'>
+    <link href='css/custom.css' rel='stylesheet'>
+  </head>
+  <body>
+    <div class='reveal'>
+      <div class='slides'>
+        <section>
+          <h1>Beverage Driven Development</h1>
+          <p>Testing your Rails Javascript</p>
+          <p>with Mocha, Chai, and Konacha</p>
+          <p>&nbsp;</p>
+          <p>by Brian Auton</p>
+        </section>
+        <section>
+          <h2>Brian Auton</h2>
+          <p>&nbsp;</p>
+          <p>&nbsp;</p>
+          <p>Developer and consultant at</p>
+          <h3>
+            <img class='neomind_logo' src='image/neologo.png'>
+            Neomind Labs
+          </h3>
+        </section>
+        <section>
+          <h2>Why JavaScript tests?</h2>
+          <ul>
+            <li>Modular and testable</li>
+            <li>Regressions</li>
+            <li>Executable specification</li>
+          </ul>
+        </section>
+        <section>
+          <h2>JS test workflow</h2>
+          <ul>
+            <li>Real browser</li>
+            <li>Headless</li>
+            <li>Automated</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Mocha</h2>
+          <ul>
+            <li>Configurable: dialects, assertions, output</li>
+            <li>Good asynchronous support</li>
+            <li>Works in browser or server-side</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Mocha: Write a test</h2>
+          <pre><code class='javascript'>function expandHeader() {&#x000A;  $(&quot;#header&quot;).height(200);&#x000A;}</code></pre>
+          <div class='fragment'>
+            <pre><code class='javascript'>suite(&quot;expandHeader&quot;, function() {&#x000A;  setup(function() {&#x000A;    $(&quot;body&quot;).append(&quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;);&#x000A;  });&#x000A;  test(&quot;should set the size&quot;, function() {&#x000A;    expandHeader();&#x000A;    if($(&quot;#header&quot;).height() !== 200) throw &quot;failure&quot;;&#x000A;  });&#x000A;});</code></pre>
+          </div>
+        </section>
+        <section>
+          <h2>Mocha: Better with CoffeeScript</h2>
+          <pre><code class='cs'>suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    throw &quot;failure&quot; unless $(&quot;#header&quot;).height() == 200</code></pre>
+        </section>
+        <section>
+          <h2>Chai: Adding assertions</h2>
+          <pre><code class='cs'>assert = chai.assert&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    assert.equal 200, $(&quot;#header&quot;).height()</code></pre>
+        </section>
+        <section>
+          <h2>Chai: should-style</h2>
+          <pre><code class='cs'>should = chai.should()&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    $(&quot;#header&quot;).height().should.equal 200</code></pre>
+        </section>
+        <section>
+          <h2>Chai: expect-style</h2>
+          <pre><code class='cs'>expect = chai.expect&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    expect($(&quot;#header&quot;).height()).to.equal 200</code></pre>
+        </section>
+        <section>
+          <h2>Mocha: Bdd-style</h2>
+          <pre><code class='cs'>mocha.ui &quot;bdd&quot;&#x000A;assert = chai.assert&#x000A;describe &quot;expandHeader&quot;, -&gt;&#x000A;  beforeEach -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  it &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    assert.equal 200, $(&quot;#header&quot;).height()</code></pre>
+        </section>
+        <section>
+          <h2>Mocha: Asynchronous</h2>
+          <pre><code class='javascript'>function expandHeader(callback) {&#x000A;  $(&quot;#header&quot;).animate({height:200}, callback);&#x000A;}</code></pre>
+          <div class='fragment'>
+            <pre><code class='cs'>assert = chai.assert&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+          </div>
+        </section>
+        <section>
+          <h2>Konacha</h2>
+          <ul>
+            <li>Handles HTML, routing, and server</li>
+            <li>Asset pipeline support</li>
+            <li>Clean environment for each test</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Installing Konacha</h2>
+          <label>Gemfile</label>
+          <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;end</code></pre>
+          <label>config/initializers/konacha.rb</label>
+          <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;end</code></pre>
+        </section>
+        <section>
+          <h2>Konacha: Writing a test</h2>
+          <label>test/javascripts/test_helper.js.coffee</label>
+          <pre><code class='cs'>mocha.ui &quot;tdd&quot;&#x000A;mocha.globals [&quot;$&quot;]</code></pre>
+          <label>test/javascripts/my_function_test.js.coffee</label>
+          <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+        </section>
+        <section>
+          <h2>Konacha: Test drivers</h2>
+          <ul>
+            <li>Selenium (default)</li>
+            <li>Capybara-webkit</li>
+            <li>Poltergeist</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Poltergeist</h2>
+          <ul>
+            <li>Install PhantomJS binary</li>
+            <li>True headless webkit</li>
+            <li>No QT or Xvfb required</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Add Poltergeist to Konacha</h2>
+          <label>Gemfile</label>
+          <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;  gem 'poltergeist', :require =&gt; &quot;capybara/poltergeist&quot;&#x000A;end</code></pre>
+          <label>config/initializers/konacha.rb</label>
+          <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;  config.driver = :poltergeist&#x000A;end</code></pre>
+        </section>
+        <section>
+          <h2>Run it</h2>
+          <pre style='color:#ccc; background:black; padding:5px; margin 1em 0; width:89%'>&gt; rake konacha:run&#x000A;.&#x000A;&#x000A;Finished in 0.41 seconds&#x000A;1 examples, 0 failed, 0 pending</pre>
+        </section>
+        <section>
+          <h2>Better Rake Syntax</h2>
+          <label>lib/tasks/test_javascripts.rake</label>
+          <pre><code>task &quot;test:javascripts&quot; =&gt; &quot;konacha:run&quot;&#x000A;task &quot;test&quot; =&gt; [&#x000A;  &quot;test:units&quot;,&#x000A;  &quot;test:functionals&quot;,&#x000A;  &quot;test:integration&quot;,&#x000A;  &quot;test:javascripts&quot;&#x000A;]</code></pre>
+          <pre style='color:#ccc; background:black; padding:5px; margin 1em 0; width:89%'>&gt; rake test:javascripts</pre>
+          <pre style='color:#ccc; background:black; padding:5px; margin 1em 0; width:89%'>&gt; rake</pre>
+        </section>
+        <section>
+          <h2>Issues</h2>
+          <ul>
+            <li>Stack trace handling</li>
+            <li>Vendored JS libraries</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Testable JS code</h2>
+          <p>For another talk...</p>
+        </section>
+      </div>
+    </div>
+    <script src='js/head.min.js'></script>
+    <script src='js/reveal.min.js'></script>
+    <script>
+      (function() {
+      
+        Reveal.initialize({
+          controls: false,
+          history: true,
+          center: false,
+          transition: "linear",
+          dependencies: [
+            {
+              src: "plugin/notes/notes.js",
+              async: true,
+              condition: function() {
+                return document.body.classList != null;
+              }
+            }, {
+              src: "plugin/highlight.js",
+              async: true,
+              callback: function() {
+                return hljs.initHighlightingOnLoad();
+              }
+            }
+          ]
+        });
+      
+      }).call(this);
+    </script>
+  </body>
+</html>
