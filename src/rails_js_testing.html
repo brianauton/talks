@@ -96,39 +96,16 @@
         <section>
           <h2>Installing Konacha</h2>
           <label>Gemfile</label>
-          <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;end</code></pre>
-          <label>config/initializers/konacha.rb</label>
-          <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;end</code></pre>
-        </section>
-        <section>
-          <h2>Konacha: Writing a test</h2>
-          <label>test/javascripts/test_helper.js.coffee</label>
-          <pre><code class='cs'>mocha.ui &quot;tdd&quot;&#x000A;mocha.globals [&quot;$&quot;]</code></pre>
-          <label>test/javascripts/my_function_test.js.coffee</label>
-          <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
-        </section>
-        <section>
-          <h2>Konacha: Test drivers</h2>
-          <ul>
-            <li>Selenium (default)</li>
-            <li>Capybara-webkit</li>
-            <li>Poltergeist</li>
-          </ul>
-        </section>
-        <section>
-          <h2>Poltergeist</h2>
-          <ul>
-            <li>Install PhantomJS binary</li>
-            <li>True headless webkit</li>
-            <li>No QT or Xvfb required</li>
-          </ul>
-        </section>
-        <section>
-          <h2>Add Poltergeist to Konacha</h2>
-          <label>Gemfile</label>
           <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;  gem 'poltergeist', :require =&gt; &quot;capybara/poltergeist&quot;&#x000A;end</code></pre>
           <label>config/initializers/konacha.rb</label>
           <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;  config.driver = :poltergeist&#x000A;end</code></pre>
+        </section>
+        <section>
+          <h2>Konacha: our test</h2>
+          <label>test/javascripts/test_helper.js.coffee</label>
+          <pre><code class='cs'>mocha.ui &quot;tdd&quot;&#x000A;mocha.globals [&quot;$&quot;]</code></pre>
+          <label>test/javascripts/expand_header_test.js.coffee</label>
+          <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
         </section>
         <section>
           <h2>Run it</h2>

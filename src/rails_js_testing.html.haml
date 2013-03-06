@@ -149,20 +149,22 @@
           :code
             group :test, :development do
               gem 'konacha'
+              gem 'poltergeist', :require => "capybara/poltergeist"
             end
           %label config/initializers/konacha.rb
           :code
             Konacha.configure do |config|
               config.spec_dir = "test/javascripts"
+              config.driver = :poltergeist
             end
 
         %section
-          %h2 Konacha: Writing a test
+          %h2 Konacha: our test
           %label test/javascripts/test_helper.js.coffee
           :code_coffee
             mocha.ui "tdd"
             mocha.globals ["$"]
-          %label test/javascripts/my_function_test.js.coffee
+          %label test/javascripts/expand_header_test.js.coffee
           :code_coffee
             #= require test_helper
             #= require application
@@ -173,35 +175,6 @@
                 expandHeader ->
                   assert.equal 200, $("#header").height()
                   done()
-
-        %section
-          %h2 Konacha: Test drivers
-          %ul
-            %li Selenium (default)
-            %li Capybara-webkit
-            %li Poltergeist
-
-        %section
-          %h2 Poltergeist
-          %ul
-            %li Install PhantomJS binary
-            %li True headless webkit
-            %li No QT or Xvfb required
-
-        %section
-          %h2 Add Poltergeist to Konacha
-          %label Gemfile
-          :code
-            group :test, :development do
-              gem 'konacha'
-              gem 'poltergeist', :require => "capybara/poltergeist"
-            end
-          %label config/initializers/konacha.rb
-          :code
-            Konacha.configure do |config|
-              config.spec_dir = "test/javascripts"
-              config.driver = :poltergeist
-            end
 
         %section
           %h2 Run it
