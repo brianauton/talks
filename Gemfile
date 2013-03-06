@@ -1,0 +1,7 @@
+source "https://rubygems.org"
+gem "guard-haml"
+gem "rb-inotify", "~> 0.8.8"
+gem "rb-fsevent"
+gem "rb-fchange"
+gem "coffee-script"
+gem "heel"
