@@ -47,17 +47,20 @@
             %li Works in browser or server-side
 
         %section
-          %h2 Mocha: Write a test        
+          %h2 Mocha: Write a test
+          %label app/assets/javascripts/application.js
           :code_js
             function expandHeader() {
               $("#header").height(200);
             }
           .fragment
+            %label expand_header_test.js
             :code_js
               suite("expandHeader", function() {
                 setup(function() {
                   $("body").append("<div id='header'></div>");
                 });
+
                 test("should set the size", function() {
                   expandHeader();
                   if($("#header").height() !== 200) throw "failure";
@@ -66,71 +69,94 @@
 
         %section
           %h2 Mocha: Better with CoffeeScript
+          %label app/assets/javascripts/application.js
+          :code_js
+            function expandHeader() {
+              $("#header").height(200);
+            }
+          %label expand_header_test.js.coffee
           :code_coffee
             suite "expandHeader", ->
               setup ->
                 $("body").append "<div id='header'></div>"
+
               test "should set the size", ->
                 expandHeader()
-                throw "failure" unless $("#header").height() == 200
+                throw "failure" if $("#header").height() != 200
 
         %section
           %h2 Chai: Adding assertions
+          %label expand_header_test.js.coffee
           :code_coffee
             assert = chai.assert
+
             suite "expandHeader", ->
               setup ->
                 $("body").append "<div id='header'></div>"
+
               test "should set the size", ->
                 expandHeader()
                 assert.equal 200, $("#header").height()
 
         %section
           %h2 Chai: should-style
+          %label expand_header_test.js.coffee
           :code_coffee
             should = chai.should()
+
             suite "expandHeader", ->
               setup ->
                 $("body").append "<div id='header'></div>"
+
               test "should set the size", ->
                 expandHeader()
                 $("#header").height().should.equal 200
 
         %section
           %h2 Chai: expect-style
+          %label expand_header_test.js.coffee
           :code_coffee
             expect = chai.expect
+
             suite "expandHeader", ->
               setup ->
                 $("body").append "<div id='header'></div>"
+
               test "should set the size", ->
                 expandHeader()
                 expect($("#header").height()).to.equal 200
 
         %section
           %h2 Mocha: Bdd-style
+          %label expand_header_test.js.coffee
           :code_coffee
             mocha.ui "bdd"
             assert = chai.assert
+
             describe "expandHeader", ->
               beforeEach ->
                 $("body").append "<div id='header'></div>"
+
               it "should set the size", ->
                 expandHeader()
                 assert.equal 200, $("#header").height()
 
         %section
           %h2 Mocha: Asynchronous
+          %label app/assets/javascripts/application.js
           :code_js
             function expandHeader(callback) {
               $("#header").animate({height:200}, callback);
             }
           .fragment
+            %label expand_header_test.js.coffee
             :code_coffee
               assert = chai.assert
+
               suite "expandHeader", ->
                 setup ->
                   $("body").append "<div id='header'></div>"
+
                 test "should set the size", (done)->
                   expandHeader ->
                     assert.equal 200, $("#header").height()
@@ -168,9 +194,11 @@
           :code_coffee
             #= require test_helper
             #= require application
+
             suite "expandHeader", ->
               setup ->
                 $("body").append "<div id='header'></div>"
+
               test "should set the size", (done)->
                 expandHeader ->
                   assert.equal 200, $("#header").height()
@@ -178,8 +206,9 @@
 
         %section
           %h2 Run it
+          %label &nbsp;
           :code_plain
-            > rake konacha:run
+            $ rake konacha:run
             .
 
             Finished in 0.41 seconds
@@ -197,9 +226,9 @@
               "test:javascripts"
             ]
           :code_plain
-            > rake test:javascripts
+            $ rake test:javascripts
           :code_plain
-            > rake
+            $ rake
 
         %section
           %h2 Issues
