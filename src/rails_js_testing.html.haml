@@ -28,7 +28,7 @@
         %section
           %h2 Why JavaScript tests?
           %ul
-            %li Modular and testable
+            %li Clean and decoupled code
             %li Regressions
             %li Executable specification
 
@@ -177,12 +177,16 @@
               gem 'konacha'
               gem 'poltergeist', :require => "capybara/poltergeist"
             end
-          %label config/initializers/konacha.rb
-          :code
-            Konacha.configure do |config|
-              config.spec_dir = "test/javascripts"
-              config.driver = :poltergeist
-            end
+          .fragment
+            %label config/initializers/konacha.rb
+            :code
+              Konacha.configure do |config|
+                config.spec_dir = "test/javascripts"
+                config.driver = :poltergeist
+              end
+          .fragment
+            %p &nbsp;
+            %p http://phantomjs.org/download.html
 
         %section
           %h2 Konacha: our test
@@ -190,19 +194,20 @@
           :code_coffee
             mocha.ui "tdd"
             mocha.globals ["$"]
-          %label test/javascripts/expand_header_test.js.coffee
-          :code_coffee
-            #= require test_helper
-            #= require application
+          .fragment
+            %label test/javascripts/expand_header_test.js.coffee
+            :code_coffee
+              #= require test_helper
+              #= require application
 
-            suite "expandHeader", ->
-              setup ->
-                $("body").append "<div id='header'></div>"
+              suite "expandHeader", ->
+                setup ->
+                  $("body").append "<div id='header'></div>"
 
-              test "should set the size", (done)->
-                expandHeader ->
-                  assert.equal 200, $("#header").height()
-                  done()
+                test "should set the size", (done)->
+                  expandHeader ->
+                    assert.equal 200, $("#header").height()
+                    done()
 
         %section
           %h2 Run it

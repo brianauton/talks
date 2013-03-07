@@ -30,7 +30,7 @@
         <section>
           <h2>Why JavaScript tests?</h2>
           <ul>
-            <li>Modular and testable</li>
+            <li>Clean and decoupled code</li>
             <li>Regressions</li>
             <li>Executable specification</li>
           </ul>
@@ -108,15 +108,23 @@
           <h2>Installing Konacha</h2>
           <label>Gemfile</label>
           <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;  gem 'poltergeist', :require =&gt; &quot;capybara/poltergeist&quot;&#x000A;end</code></pre>
-          <label>config/initializers/konacha.rb</label>
-          <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;  config.driver = :poltergeist&#x000A;end</code></pre>
+          <div class='fragment'>
+            <label>config/initializers/konacha.rb</label>
+            <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;  config.driver = :poltergeist&#x000A;end</code></pre>
+          </div>
+          <div class='fragment'>
+            <p>&nbsp;</p>
+            <p>http://phantomjs.org/download.html</p>
+          </div>
         </section>
         <section>
           <h2>Konacha: our test</h2>
           <label>test/javascripts/test_helper.js.coffee</label>
           <pre><code class='cs'>mocha.ui &quot;tdd&quot;&#x000A;mocha.globals [&quot;$&quot;]</code></pre>
-          <label>test/javascripts/expand_header_test.js.coffee</label>
-          <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+          <div class='fragment'>
+            <label>test/javascripts/expand_header_test.js.coffee</label>
+            <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+          </div>
         </section>
         <section>
           <h2>Run it</h2>
