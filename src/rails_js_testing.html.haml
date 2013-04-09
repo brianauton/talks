@@ -28,8 +28,8 @@
         %section
           %h2 Why JavaScript tests?
           %ul
-            %li Clean and decoupled code
-            %li Regressions
+            %li Clean code
+            %li Find regressions
             %li Executable specification
 
         %section
@@ -50,20 +50,20 @@
           %h2 Mocha: Write a test
           %label app/assets/javascripts/application.js
           :code_js
-            function expandHeader() {
-              $("#header").height(200);
+            function closePopup() {
+              $("#popup").remove();
             }
           .fragment
-            %label expand_header_test.js
+            %label close_popup_test.js
             :code_js
-              suite("expandHeader", function() {
+              suite("closePopup", function() {
                 setup(function() {
-                  $("body").append("<div id='header'></div>");
+                  $("body").append("<div id='popup'></div>");
                 });
 
-                test("should set the size", function() {
-                  expandHeader();
-                  if($("#header").height() !== 200) throw "failure";
+                test("should close the popup", function() {
+                  closePopup();
+                  if($("#popup").is(":visible")) throw "failure";
                 });
               });
 
@@ -71,96 +71,99 @@
           %h2 Mocha: Better with CoffeeScript
           %label app/assets/javascripts/application.js
           :code_js
-            function expandHeader() {
-              $("#header").height(200);
+            function closePopup() {
+              $("#popup").remove();
             }
-          %label expand_header_test.js.coffee
+          %label close_popup_test.js.coffee
           :code_coffee
-            suite "expandHeader", ->
+            suite "closePopup", ->
               setup ->
-                $("body").append "<div id='header'></div>"
+                $("body").append("<div id='popup'></div>");
 
-              test "should set the size", ->
-                expandHeader()
-                throw "failure" if $("#header").height() != 200
+              test "should close the popup", ->
+                closePopup()
+                throw "failure" if $("#popup").is ":visible"
 
         %section
           %h2 Chai: Adding assertions
-          %label expand_header_test.js.coffee
+          %label close_popup_test.js.coffee
           :code_coffee
             assert = chai.assert
 
-            suite "expandHeader", ->
+            suite "closePopup", ->
               setup ->
-                $("body").append "<div id='header'></div>"
+                $("body").append "<div id='popup'></div>"
 
-              test "should set the size", ->
-                expandHeader()
-                assert.equal 200, $("#header").height()
+              test "should close the popup", ->
+                closePopup()
+                assert.equal false, $("#popup").is(":visible")
 
         %section
           %h2 Chai: should-style
-          %label expand_header_test.js.coffee
+          %label close_popup_test.js.coffee
           :code_coffee
             should = chai.should()
 
-            suite "expandHeader", ->
+            suite "closePopup", ->
               setup ->
-                $("body").append "<div id='header'></div>"
+                $("body").append "<div id='popup'></div>"
 
-              test "should set the size", ->
-                expandHeader()
-                $("#header").height().should.equal 200
+              test "should close the popup", ->
+                closePopup()
+                $("#popup").is(":visible").should.equal false
 
         %section
           %h2 Chai: expect-style
-          %label expand_header_test.js.coffee
+          %label close_popup_test.js.coffee
           :code_coffee
             expect = chai.expect
 
-            suite "expandHeader", ->
+            suite "closePopup", ->
               setup ->
-                $("body").append "<div id='header'></div>"
+                $("body").append "<div id='popup'></div>"
 
-              test "should set the size", ->
-                expandHeader()
-                expect($("#header").height()).to.equal 200
+              test "should close the popup", ->
+                closePopup()
+                expect($("#popup").is(":visible")).to.equal false
 
         %section
           %h2 Mocha: Bdd-style
-          %label expand_header_test.js.coffee
+          %label close_popup_test.js.coffee
           :code_coffee
             mocha.ui "bdd"
             assert = chai.assert
 
-            describe "expandHeader", ->
+            describe "closePopup", ->
               beforeEach ->
-                $("body").append "<div id='header'></div>"
+                $("body").append "<div id='popup'></div>"
 
-              it "should set the size", ->
-                expandHeader()
-                assert.equal 200, $("#header").height()
+              it "should close the popup", ->
+                closePopup()
+                assert.equal false, $("#popup").is(":visible")
 
         %section
           %h2 Mocha: Asynchronous
           %label app/assets/javascripts/application.js
           :code_js
-            function expandHeader(callback) {
-              $("#header").animate({height:200}, callback);
+            function closePopup(callback) {
+              $("#popup").fadeOut(400);
             }
           .fragment
-            %label expand_header_test.js.coffee
+            %label close_popup_test.js.coffee
             :code_coffee
               assert = chai.assert
 
-              suite "expandHeader", ->
+              suite "closePopup", ->
                 setup ->
-                  $("body").append "<div id='header'></div>"
+                  $("body").append "<div id='popup'></div>"
 
-                test "should set the size", (done)->
-                  expandHeader ->
-                    assert.equal 200, $("#header").height()
+                test "should close the popup", (done)->
+                  closePopup()
+                  assert.equal true, $("#popup").is(":visible")
+                  setTimeout ->
+                    assert.equal false, $("#popup").is(":visible")
                     done()
+                  , 500
 
         %section
           %h2 Konacha
@@ -175,8 +178,25 @@
           :code
             group :test, :development do
               gem 'konacha'
-              gem 'poltergeist', :require => "capybara/poltergeist"
             end
+          .fragment
+            %label config/initializers/konacha.rb
+            :code
+              Konacha.configure do |config|
+                config.spec_dir = "test/javascripts"
+              end
+
+        %section
+          %h2 With Poltergeist
+          %p &nbsp;
+          %p http://phantomjs.org/download.html
+          .fragment
+            %label Gemfile
+            :code
+              group :test, :development do
+                gem 'konacha'
+                gem 'poltergeist', :require => "capybara/poltergeist"
+              end
           .fragment
             %label config/initializers/konacha.rb
             :code
@@ -184,9 +204,6 @@
                 config.spec_dir = "test/javascripts"
                 config.driver = :poltergeist
               end
-          .fragment
-            %p &nbsp;
-            %p http://phantomjs.org/download.html
 
         %section
           %h2 Konacha: our test
@@ -195,19 +212,22 @@
             mocha.ui "tdd"
             mocha.globals ["$"]
           .fragment
-            %label test/javascripts/expand_header_test.js.coffee
+            %label test/javascripts/close_popup_test.js.coffee
             :code_coffee
               #= require test_helper
               #= require application
 
-              suite "expandHeader", ->
+              suite "closePopup", ->
                 setup ->
-                  $("body").append "<div id='header'></div>"
+                  $("body").append "<div id='popup'></div>"
 
-                test "should set the size", (done)->
-                  expandHeader ->
-                    assert.equal 200, $("#header").height()
+                test "should close the popup", (done)->
+                  closePopup()
+                  assert.equal true, $("#popup").is(":visible")
+                  setTimeout ->
+                    assert.equal false, $("#popup").is(":visible")
                     done()
+                  , 500
 
         %section
           %h2 Run it
@@ -238,8 +258,9 @@
         %section
           %h2 Issues
           %ul
+            %li
+              %del Vendored JS libraries
             %li Stack trace handling
-            %li Vendored JS libraries
 
         %section
           %h2 Testable JS code
@@ -249,7 +270,7 @@
     %script{src:"js/reveal.min.js"}
     :coffee
       Reveal.initialize
-        controls: true
+        controls: false
         history: true
         center: false
         transition: "linear"

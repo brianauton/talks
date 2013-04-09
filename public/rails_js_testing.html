@@ -30,8 +30,8 @@
         <section>
           <h2>Why JavaScript tests?</h2>
           <ul>
-            <li>Clean and decoupled code</li>
-            <li>Regressions</li>
+            <li>Clean code</li>
+            <li>Find regressions</li>
             <li>Executable specification</li>
           </ul>
         </section>
@@ -54,46 +54,46 @@
         <section>
           <h2>Mocha: Write a test</h2>
           <label>app/assets/javascripts/application.js</label>
-          <pre><code class='javascript'>function expandHeader() {&#x000A;  $(&quot;#header&quot;).height(200);&#x000A;}</code></pre>
+          <pre><code class='javascript'>function closePopup() {&#x000A;  $(&quot;#popup&quot;).remove();&#x000A;}</code></pre>
           <div class='fragment'>
-            <label>expand_header_test.js</label>
-            <pre><code class='javascript'>suite(&quot;expandHeader&quot;, function() {&#x000A;  setup(function() {&#x000A;    $(&quot;body&quot;).append(&quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;);&#x000A;  });&#x000A;&#x000A;  test(&quot;should set the size&quot;, function() {&#x000A;    expandHeader();&#x000A;    if($(&quot;#header&quot;).height() !== 200) throw &quot;failure&quot;;&#x000A;  });&#x000A;});</code></pre>
+            <label>close_popup_test.js</label>
+            <pre><code class='javascript'>suite(&quot;closePopup&quot;, function() {&#x000A;  setup(function() {&#x000A;    $(&quot;body&quot;).append(&quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;);&#x000A;  });&#x000A;&#x000A;  test(&quot;should close the popup&quot;, function() {&#x000A;    closePopup();&#x000A;    if($(&quot;#popup&quot;).is(&quot;:visible&quot;)) throw &quot;failure&quot;;&#x000A;  });&#x000A;});</code></pre>
           </div>
         </section>
         <section>
           <h2>Mocha: Better with CoffeeScript</h2>
           <label>app/assets/javascripts/application.js</label>
-          <pre><code class='javascript'>function expandHeader() {&#x000A;  $(&quot;#header&quot;).height(200);&#x000A;}</code></pre>
-          <label>expand_header_test.js.coffee</label>
-          <pre><code class='cs'>suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    throw &quot;failure&quot; if $(&quot;#header&quot;).height() != 200</code></pre>
+          <pre><code class='javascript'>function closePopup() {&#x000A;  $(&quot;#popup&quot;).remove();&#x000A;}</code></pre>
+          <label>close_popup_test.js.coffee</label>
+          <pre><code class='cs'>suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append(&quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;);&#x000A;&#x000A;  test &quot;should close the popup&quot;, -&gt;&#x000A;    closePopup()&#x000A;    throw &quot;failure&quot; if $(&quot;#popup&quot;).is &quot;:visible&quot;</code></pre>
         </section>
         <section>
           <h2>Chai: Adding assertions</h2>
-          <label>expand_header_test.js.coffee</label>
-          <pre><code class='cs'>assert = chai.assert&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    assert.equal 200, $(&quot;#header&quot;).height()</code></pre>
+          <label>close_popup_test.js.coffee</label>
+          <pre><code class='cs'>assert = chai.assert&#x000A;&#x000A;suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should close the popup&quot;, -&gt;&#x000A;    closePopup()&#x000A;    assert.equal false, $(&quot;#popup&quot;).is(&quot;:visible&quot;)</code></pre>
         </section>
         <section>
           <h2>Chai: should-style</h2>
-          <label>expand_header_test.js.coffee</label>
-          <pre><code class='cs'>should = chai.should()&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    $(&quot;#header&quot;).height().should.equal 200</code></pre>
+          <label>close_popup_test.js.coffee</label>
+          <pre><code class='cs'>should = chai.should()&#x000A;&#x000A;suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should close the popup&quot;, -&gt;&#x000A;    closePopup()&#x000A;    $(&quot;#popup&quot;).is(&quot;:visible&quot;).should.equal false</code></pre>
         </section>
         <section>
           <h2>Chai: expect-style</h2>
-          <label>expand_header_test.js.coffee</label>
-          <pre><code class='cs'>expect = chai.expect&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    expect($(&quot;#header&quot;).height()).to.equal 200</code></pre>
+          <label>close_popup_test.js.coffee</label>
+          <pre><code class='cs'>expect = chai.expect&#x000A;&#x000A;suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should close the popup&quot;, -&gt;&#x000A;    closePopup()&#x000A;    expect($(&quot;#popup&quot;).is(&quot;:visible&quot;)).to.equal false</code></pre>
         </section>
         <section>
           <h2>Mocha: Bdd-style</h2>
-          <label>expand_header_test.js.coffee</label>
-          <pre><code class='cs'>mocha.ui &quot;bdd&quot;&#x000A;assert = chai.assert&#x000A;&#x000A;describe &quot;expandHeader&quot;, -&gt;&#x000A;  beforeEach -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  it &quot;should set the size&quot;, -&gt;&#x000A;    expandHeader()&#x000A;    assert.equal 200, $(&quot;#header&quot;).height()</code></pre>
+          <label>close_popup_test.js.coffee</label>
+          <pre><code class='cs'>mocha.ui &quot;bdd&quot;&#x000A;assert = chai.assert&#x000A;&#x000A;describe &quot;closePopup&quot;, -&gt;&#x000A;  beforeEach -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  it &quot;should close the popup&quot;, -&gt;&#x000A;    closePopup()&#x000A;    assert.equal false, $(&quot;#popup&quot;).is(&quot;:visible&quot;)</code></pre>
         </section>
         <section>
           <h2>Mocha: Asynchronous</h2>
           <label>app/assets/javascripts/application.js</label>
-          <pre><code class='javascript'>function expandHeader(callback) {&#x000A;  $(&quot;#header&quot;).animate({height:200}, callback);&#x000A;}</code></pre>
+          <pre><code class='javascript'>function closePopup(callback) {&#x000A;  $(&quot;#popup&quot;).fadeOut(400);&#x000A;}</code></pre>
           <div class='fragment'>
-            <label>expand_header_test.js.coffee</label>
-            <pre><code class='cs'>assert = chai.assert&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+            <label>close_popup_test.js.coffee</label>
+            <pre><code class='cs'>assert = chai.assert&#x000A;&#x000A;suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should close the popup&quot;, (done)-&gt;&#x000A;    closePopup()&#x000A;    assert.equal true, $(&quot;#popup&quot;).is(&quot;:visible&quot;)&#x000A;    setTimeout -&gt;&#x000A;      assert.equal false, $(&quot;#popup&quot;).is(&quot;:visible&quot;)&#x000A;      done()&#x000A;    , 500</code></pre>
           </div>
         </section>
         <section>
@@ -107,14 +107,23 @@
         <section>
           <h2>Installing Konacha</h2>
           <label>Gemfile</label>
-          <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;  gem 'poltergeist', :require =&gt; &quot;capybara/poltergeist&quot;&#x000A;end</code></pre>
+          <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;end</code></pre>
+          <div class='fragment'>
+            <label>config/initializers/konacha.rb</label>
+            <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;end</code></pre>
+          </div>
+        </section>
+        <section>
+          <h2>With Poltergeist</h2>
+          <p>&nbsp;</p>
+          <p>http://phantomjs.org/download.html</p>
+          <div class='fragment'>
+            <label>Gemfile</label>
+            <pre><code>group :test, :development do&#x000A;  gem 'konacha'&#x000A;  gem 'poltergeist', :require =&gt; &quot;capybara/poltergeist&quot;&#x000A;end</code></pre>
+          </div>
           <div class='fragment'>
             <label>config/initializers/konacha.rb</label>
             <pre><code>Konacha.configure do |config|&#x000A;  config.spec_dir = &quot;test/javascripts&quot;&#x000A;  config.driver = :poltergeist&#x000A;end</code></pre>
-          </div>
-          <div class='fragment'>
-            <p>&nbsp;</p>
-            <p>http://phantomjs.org/download.html</p>
           </div>
         </section>
         <section>
@@ -122,8 +131,8 @@
           <label>test/javascripts/test_helper.js.coffee</label>
           <pre><code class='cs'>mocha.ui &quot;tdd&quot;&#x000A;mocha.globals [&quot;$&quot;]</code></pre>
           <div class='fragment'>
-            <label>test/javascripts/expand_header_test.js.coffee</label>
-            <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;&#x000A;suite &quot;expandHeader&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='header'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should set the size&quot;, (done)-&gt;&#x000A;    expandHeader -&gt;&#x000A;      assert.equal 200, $(&quot;#header&quot;).height()&#x000A;      done()</code></pre>
+            <label>test/javascripts/close_popup_test.js.coffee</label>
+            <pre><code class='cs'>#= require test_helper&#x000A;#= require application&#x000A;&#x000A;suite &quot;closePopup&quot;, -&gt;&#x000A;  setup -&gt;&#x000A;    $(&quot;body&quot;).append &quot;&lt;div id='popup'&gt;&lt;/div&gt;&quot;&#x000A;&#x000A;  test &quot;should close the popup&quot;, (done)-&gt;&#x000A;    closePopup()&#x000A;    assert.equal true, $(&quot;#popup&quot;).is(&quot;:visible&quot;)&#x000A;    setTimeout -&gt;&#x000A;      assert.equal false, $(&quot;#popup&quot;).is(&quot;:visible&quot;)&#x000A;      done()&#x000A;    , 500</code></pre>
           </div>
         </section>
         <section>
@@ -141,8 +150,10 @@
         <section>
           <h2>Issues</h2>
           <ul>
+            <li>
+              <del>Vendored JS libraries</del>
+            </li>
             <li>Stack trace handling</li>
-            <li>Vendored JS libraries</li>
           </ul>
         </section>
         <section>
@@ -157,7 +168,7 @@
       (function() {
       
         Reveal.initialize({
-          controls: true,
+          controls: false,
           history: true,
           center: false,
           transition: "linear",
