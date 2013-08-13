@@ -1,0 +1,239 @@
+!!!
+%html
+  %head
+    %title Using Rails 4 Features in a Real-World Application
+    %link{rel:"stylesheet", href:"css/reveal.min.css"}
+    %link{rel:"stylesheet", href:"css/theme/default.css", id:"theme"}
+    %link{rel:"stylesheet", href:"lib/css/tomorrow-night-bright.css"}
+    %link{rel:"stylesheet", href:"css/custom.css"}
+  %body
+    .reveal
+      .slides
+        %section
+          %h1 Using Rails 4 Features
+          %p In a Real Application
+          %p &nbsp;
+          %p by Brian Auton
+
+        %section
+          %h2 Brian Auton
+          %p &nbsp;
+          %p &nbsp;
+          %p Developer and consultant at
+          %h3
+            %img.neomind_logo{src:"image/neologo.png"}
+            Neomind Labs
+
+        %section
+          %h2 Centipede
+          %ul
+            %li Internal Neomind application
+            %li Business analytics
+            %li Pulls data from Freckle
+
+        %section
+          %h2 Model Overview
+          :code_ruby
+            class Entry < ActiveRecord::Base
+              belongs_to :developer
+              belongs_to :project
+            end
+          :code_ruby
+            class Developer < ActiveRecord::Base
+              has_many :entries, dependent: :destroy
+              has_many :rates, class_name: "DeveloperRate"
+
+              def dollars_paid(conditions = {})
+                rates.to_a.sum{|rate| rate.dollars_paid conditions}
+              end
+            end
+          :code_ruby
+            class Project < ActiveRecord::Base
+              has_many :entries, dependent: :destroy
+              has_many :developers, -> { uniq }, through: :entries
+
+              def cost_of_sales(conditions = {})
+                developers.to_a.sum do |developer|
+                  developer.dollars_paid(conditions.merge project_id: id)
+                end
+              end
+            end
+
+        %section
+          %h2 The Problem
+          %ul
+            %li Views are too slow
+
+        %section
+          %h2 Fragment Caching
+          :code_ruby
+            - cache @parent do
+              %p This is the parent model view
+              = render @parent.children
+          :code_ruby
+            - cache @child do
+              %p This is the child model view
+          %ul
+            %li Uses model's cache_key
+            %li Based on updated_at
+            %li Rails 4: Cache Digests (detects updated views)
+
+        %section
+          %h2 Implementing Fragment Caching
+          :code_ruby
+            class Entry < ActiveRecord::Base
+              belongs_to :developer, touch: true
+              belongs_to :project, touch: true
+            end
+          :code_ruby
+            - cache [@projects, date_range] do
+              - @project.each do |project|
+                = "Project: " + @project.name
+                # additional view code...
+
+        %section
+          %h2 Drawbacks to Fragment Caching
+          %ul
+            %li More granularity needed
+            %li Heavy customization of views
+
+        %section
+          %h2 New Solution
+          %ul
+            %li At the model level
+            %li Still uses cache_key and touch:true
+            %li Write once, use in many models
+
+        %section
+          %section
+            %h2 ActiveSupport::Concern
+            %ul
+              %li Cleaner, more structured mixins
+              %li Easy inter-module dependencies
+              %li Rails 4: automatic require
+              %li Rails 4: automatic autoload paths
+
+          %section
+            %h2 ActiveSupport::Concern
+            :code_ruby
+              module M
+                def self.included(base)
+                  base.extend ClassMethods
+                  base.class_eval do
+                    scope :disabled, -> { where(disabled: true) }
+                  end
+                end
+
+                module ClassMethods
+                  # ...
+                end
+              end
+            :code_ruby
+              module M
+                extend ActiveSupport::Concern
+
+                included do
+                  scope :disabled, -> { where(disabled: true) }
+                end
+
+                module ClassMethods
+                  # ...
+                end
+              end
+
+
+        %section
+          %h2 Using ActiveSupport::Concern
+          :code_ruby
+            module AttributeCalculable
+              extend ActiveSupport::Concern
+
+              module ClassMethods
+                def calculates(attribute, &calculation)
+                  define_method attribute do |*args|
+                    instance_exec *args, &calculation
+                  end
+                end
+              end
+            end
+          :code_ruby
+            class Project < ActiveRecord::Base
+              include AttributeCalculable
+
+              calculates :cost_of_sales do |conditions = {}|
+                developers.to_a.sum do |developer|
+                  developer.dollars_paid(conditions.merge project_id: id)
+                end
+              end
+            end
+
+        %section
+          %section
+            %h2 Transparent caching (1)
+            :code_ruby
+              create_table :cached_calculations do |t|
+                t.references :attribute_calculable, polymorphic: true
+                t.string :attribute_calculable_cache_key
+                t.string :attribute_name
+                t.string :hashed_arguments
+                t.string :value
+                t.timestamps
+              end
+            :code_ruby
+              class CachedCalculation < ActiveRecord::Base
+                belongs_to :attribute_calculable, polymorphic: true
+                serialize :value
+              end
+            :code_ruby
+              module AttributeCalculable
+                included do
+                  has_many :cached_calculations, :as => :attribute_calculable
+                end
+              end
+          %section
+            %h2 Transparent caching (2)
+            :code_ruby
+              module AttributeCalculable
+                module ClassMethods
+                  def calculates(attribute, &calculation)
+                    define_method attribute do |*args|
+                      criteria = {
+                        attribute_name: attribute,
+                        hashed_arguments: Digest::MD5.hexdigest(args.to_yaml),
+                      }
+                      cache = cached_calculations.where(criteria).first_or_create
+                      if cache.attribute_calculable_cache_key != cache_key
+                        cache.value = instance_exec(*args, &calculation)
+                        cache.attribute_calculable_cache_key = cache_key
+                        cache.save
+                      end
+                      cache.value
+                    end
+                  end
+
+        %section
+          %h2 Gotchas
+          %ul
+            %li ActiveRecord associations
+            %li Disk space
+
+        %section
+          %h2 Speed Improvement
+          %h3 (project profitability report, 12 months)
+          %ul
+            %li Original: 13s
+            %li CachedCalculation: 1.6s
+            %li Fragment caching: 0.2s
+
+    %script{src:"js/head.min.js"}
+    %script{src:"js/reveal.min.js"}
+    :coffee
+      Reveal.initialize
+        controls: false
+        history: true
+        center: false
+        transition: "linear"
+        dependencies: [
+          {src:"plugin/notes/notes.js", async:true, condition:->document.body.classList?}
+          {src:"plugin/highlight.js", async:true, callback:->hljs.initHighlightingOnLoad()}
+        ]

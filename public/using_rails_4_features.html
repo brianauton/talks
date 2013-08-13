@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Using Rails 4 Features in a Real-World Application</title>
+    <link href='css/reveal.min.css' rel='stylesheet'>
+    <link href='css/theme/default.css' id='theme' rel='stylesheet'>
+    <link href='lib/css/tomorrow-night-bright.css' rel='stylesheet'>
+    <link href='css/custom.css' rel='stylesheet'>
+  </head>
+  <body>
+    <div class='reveal'>
+      <div class='slides'>
+        <section>
+          <h1>Using Rails 4 Features</h1>
+          <p>In a Real Application</p>
+          <p>&nbsp;</p>
+          <p>by Brian Auton</p>
+        </section>
+        <section>
+          <h2>Brian Auton</h2>
+          <p>&nbsp;</p>
+          <p>&nbsp;</p>
+          <p>Developer and consultant at</p>
+          <h3>
+            <img class='neomind_logo' src='image/neologo.png'>
+            Neomind Labs
+          </h3>
+        </section>
+        <section>
+          <h2>Centipede</h2>
+          <ul>
+            <li>Internal Neomind application</li>
+            <li>Business analytics</li>
+            <li>Pulls data from Freckle</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Model Overview</h2>
+          <pre><code class='ruby'>class Entry &lt; ActiveRecord::Base&#x000A;  belongs_to :developer&#x000A;  belongs_to :project&#x000A;end</code></pre>
+          <pre><code class='ruby'>class Developer &lt; ActiveRecord::Base&#x000A;  has_many :entries, dependent: :destroy&#x000A;  has_many :rates, class_name: &quot;DeveloperRate&quot;&#x000A;&#x000A;  def dollars_paid(conditions = {})&#x000A;    rates.to_a.sum{|rate| rate.dollars_paid conditions}&#x000A;  end&#x000A;end</code></pre>
+          <pre><code class='ruby'>class Project &lt; ActiveRecord::Base&#x000A;  has_many :entries, dependent: :destroy&#x000A;  has_many :developers, -&gt; { uniq }, through: :entries&#x000A;&#x000A;  def cost_of_sales(conditions = {})&#x000A;    developers.to_a.sum do |developer|&#x000A;      developer.dollars_paid(conditions.merge project_id: id)&#x000A;    end&#x000A;  end&#x000A;end</code></pre>
+        </section>
+        <section>
+          <h2>The Problem</h2>
+          <ul>
+            <li>Views are too slow</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Fragment Caching</h2>
+          <pre><code class='ruby'>- cache @parent do&#x000A;  %p This is the parent model view&#x000A;  = render @parent.children</code></pre>
+          <pre><code class='ruby'>- cache @child do&#x000A;  %p This is the child model view</code></pre>
+          <ul>
+            <li>Uses model's cache_key</li>
+            <li>Based on updated_at</li>
+            <li>Rails 4: Cache Digests (detects updated views)</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Implementing Fragment Caching</h2>
+          <pre><code class='ruby'>class Entry &lt; ActiveRecord::Base&#x000A;  belongs_to :developer, touch: true&#x000A;  belongs_to :project, touch: true&#x000A;end</code></pre>
+          <pre><code class='ruby'>- cache [@projects, date_range] do&#x000A;  - @project.each do |project|&#x000A;    = &quot;Project: &quot; + @project.name&#x000A;    # additional view code...</code></pre>
+        </section>
+        <section>
+          <h2>Drawbacks to Fragment Caching</h2>
+          <ul>
+            <li>More granularity needed</li>
+            <li>Heavy customization of views</li>
+          </ul>
+        </section>
+        <section>
+          <h2>New Solution</h2>
+          <ul>
+            <li>At the model level</li>
+            <li>Still uses cache_key and touch:true</li>
+            <li>Write once, use in many models</li>
+          </ul>
+        </section>
+        <section>
+          <section>
+            <h2>ActiveSupport::Concern</h2>
+            <ul>
+              <li>Cleaner, more structured mixins</li>
+              <li>Easy inter-module dependencies</li>
+              <li>Rails 4: automatic require</li>
+              <li>Rails 4: automatic autoload paths</li>
+            </ul>
+          </section>
+          <section>
+            <h2>ActiveSupport::Concern</h2>
+            <pre><code class='ruby'>module M&#x000A;  def self.included(base)&#x000A;    base.extend ClassMethods&#x000A;    base.class_eval do&#x000A;      scope :disabled, -&gt; { where(disabled: true) }&#x000A;    end&#x000A;  end&#x000A;&#x000A;  module ClassMethods&#x000A;    # ...&#x000A;  end&#x000A;end</code></pre>
+            <pre><code class='ruby'>module M&#x000A;  extend ActiveSupport::Concern&#x000A;&#x000A;  included do&#x000A;    scope :disabled, -&gt; { where(disabled: true) }&#x000A;  end&#x000A;&#x000A;  module ClassMethods&#x000A;    # ...&#x000A;  end&#x000A;end</code></pre>
+          </section>
+        </section>
+        <section>
+          <h2>Using ActiveSupport::Concern</h2>
+          <pre><code class='ruby'>module AttributeCalculable&#x000A;  extend ActiveSupport::Concern&#x000A;&#x000A;  module ClassMethods&#x000A;    def calculates(attribute, &amp;calculation)&#x000A;      define_method attribute do |*args|&#x000A;        instance_exec *args, &amp;calculation&#x000A;      end&#x000A;    end&#x000A;  end&#x000A;end</code></pre>
+          <pre><code class='ruby'>class Project &lt; ActiveRecord::Base&#x000A;  include AttributeCalculable&#x000A;&#x000A;  calculates :cost_of_sales do |conditions = {}|&#x000A;    developers.to_a.sum do |developer|&#x000A;      developer.dollars_paid(conditions.merge project_id: id)&#x000A;    end&#x000A;  end&#x000A;end</code></pre>
+        </section>
+        <section>
+          <section>
+            <h2>Transparent caching (1)</h2>
+            <pre><code class='ruby'>create_table :cached_calculations do |t|&#x000A;  t.references :attribute_calculable, polymorphic: true&#x000A;  t.string :attribute_calculable_cache_key&#x000A;  t.string :attribute_name&#x000A;  t.string :hashed_arguments&#x000A;  t.string :value&#x000A;  t.timestamps&#x000A;end</code></pre>
+            <pre><code class='ruby'>class CachedCalculation &lt; ActiveRecord::Base&#x000A;  belongs_to :attribute_calculable, polymorphic: true&#x000A;  serialize :value&#x000A;end</code></pre>
+            <pre><code class='ruby'>module AttributeCalculable&#x000A;  included do&#x000A;    has_many :cached_calculations, :as =&gt; :attribute_calculable&#x000A;  end&#x000A;end</code></pre>
+          </section>
+          <section>
+            <h2>Transparent caching (2)</h2>
+            <pre><code class='ruby'>module AttributeCalculable&#x000A;  module ClassMethods&#x000A;    def calculates(attribute, &amp;calculation)&#x000A;      define_method attribute do |*args|&#x000A;        criteria = {&#x000A;          attribute_name: attribute,&#x000A;          hashed_arguments: Digest::MD5.hexdigest(args.to_yaml),&#x000A;        }&#x000A;        cache = cached_calculations.where(criteria).first_or_create&#x000A;        if cache.attribute_calculable_cache_key != cache_key&#x000A;          cache.value = instance_exec(*args, &amp;calculation)&#x000A;          cache.attribute_calculable_cache_key = cache_key&#x000A;          cache.save&#x000A;        end&#x000A;        cache.value&#x000A;      end&#x000A;    end</code></pre>
+          </section>
+        </section>
+        <section>
+          <h2>Gotchas</h2>
+          <ul>
+            <li>ActiveRecord associations</li>
+            <li>Disk space</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Speed Improvement</h2>
+          <h3>(project profitability report, 12 months)</h3>
+          <ul>
+            <li>Original: 13s</li>
+            <li>CachedCalculation: 1.6s</li>
+            <li>Fragment caching: 0.2s</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <script src='js/head.min.js'></script>
+    <script src='js/reveal.min.js'></script>
+    <script>
+      (function() {
+      
+        Reveal.initialize({
+          controls: false,
+          history: true,
+          center: false,
+          transition: "linear",
+          dependencies: [
+            {
+              src: "plugin/notes/notes.js",
+              async: true,
+              condition: function() {
+                return document.body.classList != null;
+              }
+            }, {
+              src: "plugin/highlight.js",
+              async: true,
+              callback: function() {
+                return hljs.initHighlightingOnLoad();
+              }
+            }
+          ]
+        });
+      
+      }).call(this);
+    </script>
+  </body>
+</html>
