@@ -30,3 +30,11 @@ module Haml::Filters::Code_plain
     "<pre style='color:#ccc; background:black; padding:5px; margin 1em 0; width:89%'>#{escaped.strip}</pre>"
   end
 end
+
+module Haml::Filters::Code_Ruby
+  include Haml::Filters::Base
+  def render(text)
+    escaped = Haml::Helpers.html_escape text
+    "<pre><code class='ruby'>#{escaped.strip}</code></pre>"
+  end
+end
